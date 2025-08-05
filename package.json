@@ -1,15 +1,12 @@
 {
-  "name": "murphys-curves",
+  "name": "murphys-curves-api",
   "version": "1.0.0",
-  "description": "FLNG Engineering Calculations",
+  "description": "Backend API for FLNG calculations",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2"
-  },
-  "engines": {
-    "node": "18.x"
   }
 }
