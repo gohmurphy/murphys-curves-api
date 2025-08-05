@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murphy's Curves | FLNG Engineering Suite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0c2d48;
+            --secondary: #145da0;
+            --accent: #2e8bc0;
+            --highlight: #b1d4e0;
+            --light: #f5f9fc;
+            --dark: #051923;
+            --gold: #FFD700;
+            --platinum: #e5e4e2;
+            --steel: #b0c4de;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(46, 139, 192, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(177, 212, 224, 0.1) 0%, transparent 20%);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* Header Styles */
+        header {
+            background: rgba(5, 25, 35, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--accent);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo-icon {
+            font-size: 2.8rem;
+            color: var(--gold);
+            margin-right: 12px;
+        }
+        .logo-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 1.7rem;
+            color: var(--platinum);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            line-height: 1.2;
+        }
+        .logo-text span {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--steel);
+            letter-spacing: 3px;
+            margin-top: 3px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        .nav-links li {
+            margin-left: 35px;
+        }
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 5px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .nav-links a:hover {
+            color: var(--highlight);
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: var(--gold);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .btn {
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.95rem;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+        .btn-outline:hover {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--light);
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #daa520);
+            color: var(--dark);
+            font-weight: 700;
+            letter-spacing: 2px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #daa520, var(--gold));
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 90px;
+        }
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1560448204-603b3fc33ddc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        .hero-content {
+            max-width: 800px;
+            position: relative;
+            z-index: 2;
+        }
+        .hero h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 4.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.15;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .hero h1 span {
+            color: var(--gold);
+            display: block;
+            font-size: 3.5rem;
+        }
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            line-height: 1.7;
+            max-width: 700px;
+            color: var(--highlight);
+        }
+        .hero-stats {
+            display: flex;
+            gap: 50px;
+            margin-top: 50px;
+        }
+        .stat-item {
+            text-align: center;
+            position: relative;
+        }
+        .stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 50px;
+            background: rgba(177, 212, 224, 0.3);
+        }
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            opacity: 0.9;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        /* Features Section */
+        .section-title {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+        }
+        .section-title h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+        .section-title p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: var(--highlight);
+            line-height: 1.7;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: var(--gold);
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .features {
+            padding: 120px 0;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+        .feature-card {
+            background: rgba(12, 45, 72, 0.6);
+            border: 1px solid rgba(46, 139, 192, 0.3);
+            border-radius: 8px;
+            padding: 35px 30px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 0;
+            background: var(--gold);
+            transition: all 0.4s ease;
+        }
+        .feature-card:hover::before {
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: var(--gold);
+        }
+        .feature-icon {
+            font-size: 2.8rem;
+            color: var(--gold);
+            margin-bottom: 25px;
+        }
+        .feature-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: var(--platinum);
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 1px;
+        }
+        .feature-card p {
+            line-height: 1.7;
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+        /* Calculations Section */
+        .calculations {
+            padding: 120px 0 100px;
+            background: rgba(5, 25, 35, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+        .calculations::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .calc-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .calc-tab {
+            padding: 16px 35px;
+            background: rgba(12, 45, 72, 0.8);
+            border: 1px solid rgba(46, 139, 192, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 1.05rem;
+        }
+        .calc-tab.active, .calc-tab:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--dark);
+        }
+        .calc-content {
+            background: rgba(12, 45, 72, 0.8);
+            border: 1px solid rgba(46, 139, 192, 0.3);
+            border-radius: 8px;
+            padding: 45px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        .calc-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            color: var(--gold);
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(5, 25, 35, 0.7);
+            border: 1px solid rgba(46, 139, 192, 0.3);
+            border-radius: 4px;
+            color: var(--light);
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+        }
+        .calc-result {
+            background: rgba(5, 25, 35, 0.8);
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 40px;
+            border-left: 4px solid var(--gold);
+        }
+        .calc-result h3 {
+            margin-bottom: 20px;
+            color: var(--platinum);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .result-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            color: var(--gold);
+            margin-top: 10px;
+        }
+        .result-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(177, 212, 224, 0.2);
+        }
+        .result-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .result-label {
+            min-width: 220px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.05rem;
+            color: var(--highlight);
+        }
+        /* Offloading Section */
+        .offloading {
+            padding: 100px 0;
+            background: rgba(12, 45, 72, 0.4);
+            position: relative;
+        }
+        .offloading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .offloading-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 50px;
+        }
+        @media (max-width: 992px) {
+            .offloading-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .offloading-input {
+            background: rgba(12, 45, 72, 0.6);
+            border: 1px solid rgba(46, 139, 192, 0.3);
+            border-radius: 8px;
+            padding: 35px 30px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        .offloading-input::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 0;
+            background: var(--accent);
+            transition: all 0.4s ease;
+        }
+        .offloading-input:hover::before {
+            height: 100%;
+        }
+        .offloading-results {
+            background: rgba(12, 45, 72, 0.6);
+            border: 1px solid rgba(46, 139, 192, 0.3);
+            border-radius: 8px;
+            padding: 35px 30px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        .offloading-results::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 0;
+            background: var(--gold);
+            transition: all 0.4s ease;
+        }
+        .offloading-results:hover::before {
+            height: 100%;
+        }
+        .result-card {
+            background: rgba(5, 25, 35, 0.7);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--gold);
+        }
+        .offloading-result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(177, 212, 224, 0.2);
+        }
+        .offloading-result-row:last-child {
+            border-bottom: none;
+        }
+        .offloading-result-label {
+            font-weight: 600;
+            color: var(--highlight);
+        }
+        .offloading-result-value {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--gold);
+            font-size: 1.1rem;
+        }
+        .chart-container {
+            margin-top: 30px;
+            background: rgba(5, 25, 35, 0.7);
+            border-radius: 8px;
+            padding: 20px;
+            height: 300px;
+        }
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(5, 25, 35, 0.7);
+        }
+        .results-table th {
+            background: rgba(12, 45, 72, 0.8);
+            padding: 15px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            font-family: 'Rajdhani', sans-serif;
+            border-bottom: 2px solid var(--gold);
+        }
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(177, 212, 224, 0.2);
+        }
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        .results-table tr:hover {
+            background: rgba(46, 139, 192, 0.1);
+        }
+        /* Footer */
+        footer {
+            background: var(--dark);
+            padding: 80px 0 40px;
+            border-top: 1px solid rgba(46, 139, 192, 0.3);
+            position: relative;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+        .footer-col h3 {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: var(--gold);
+            position: relative;
+            padding-bottom: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--gold);
+            bottom: 0;
+            left: 0;
+        }
+        .footer-links {
+            list-style: none;
+        }
+        .footer-links li {
+            margin-bottom: 15px;
+        }
+        .footer-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-links a i {
+            color: var(--gold);
+            font-size: 0.8rem;
+        }
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--gold);
+            transform: translateX(5px);
+        }
+        .copyright {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1rem;
+            opacity: 0.7;
+            letter-spacing: 1px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        /* Auth Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 25, 35, 0.95);
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(145deg, var(--primary), #0a2439);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 550px;
+            border: 1px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            padding: 25px 30px;
+            background: rgba(5, 25, 35, 0.8);
+            border-bottom: 1px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--gold);
+            font-size: 1.8rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: var(--light);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .close-modal:hover {
+            color: var(--gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+        .modal-body {
+            padding: 40px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 35px;
+            border-bottom: 1px solid rgba(46, 139, 192, 0.3);
+        }
+        .tab {
+            padding: 18px 35px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 1.1rem;
+        }
+        .tab.active {
+            border-bottom: 3px solid var(--gold);
+            color: var(--gold);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+            .hero h1 span {
+                font-size: 3rem;
+            }
+        }
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            .hero h1 span {
+                font-size: 2.5rem;
+            }
+            .calc-form {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .hero h1 {
+                font-size: 2.6rem;
+            }
+            .hero h1 span {
+                font-size: 2.2rem;
+            }
+            .hero-stats {
+                flex-wrap: wrap;
+                gap: 30px;
+            }
+            .stat-item {
+                flex: 1 0 45%;
+            }
+            .stat-item:not(:last-child)::after {
+                display: none;
+            }
+            .feature-card {
+                padding: 30px 25px;
+            }
+        }
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero h1 span {
+                font-size: 1.8rem;
+            }
+            .hero p {
+                font-size: 1.1rem;
+            }
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+            .logo-text {
+                font-size: 1.4rem;
+            }
+            .logo-text span {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="logo-text">
+                    MURPHY'S CURVES
+                    <span>FLNG ENGINEERING SUITE</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Capabilities</a></li>
+                <li><a href="#calculations">Calculations</a></li>
+                <li><a href="#offloading">Offloading</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <button class="btn btn-outline" id="loginBtn">Login</button>
+                <button class="btn btn-primary" id="registerBtn">Register</button>
+            </div>
+        </div>
+    </header>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>PRECISION ENGINEERING <span>FOR FLNG EXCELLENCE</span></h1>
+                <p>Murphy's Curves provides the industry's most advanced engineering calculation suite for Floating Liquefied Natural Gas operations. Developed by experts, trusted by professionals worldwide.</p>
+                <div class="auth-buttons">
+                    <button class="btn btn-primary" id="heroRegisterBtn">Request Access</button>
+                    <button class="btn btn-outline">Explore Modules</button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">28+</div>
+                        <div class="stat-label">Engineering Modules</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">99.2%</div>
+                        <div class="stat-label">Accuracy Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">1.8k+</div>
+                        <div class="stat-label">Industry Users</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Engineering Capabilities</h2>
+                <p>Murphy's Curves offers the most comprehensive set of FLNG engineering calculations in the market, trusted by top operators worldwide.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <h3>Hydrodynamic Analysis</h3>
+                    <p>Advanced motion response and wave load calculations for FLNG vessels in extreme conditions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-fire-alt"></i>
+                    </div>
+                    <h3>Process Optimization</h3>
+                    <p>Precise LNG liquefaction process modeling and optimization tools for maximum efficiency.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-anchor"></i>
+                    </div>
+                    <h3>Offloading Systems</h3>
+                    <p>Dynamic positioning and offloading calculations for safe LNG transfer operations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <h3>Structural Integrity</h3>
+                    <p>Comprehensive structural analysis for hull, turret, and mooring systems under various load cases.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-snowflake"></i>
+                    </div>
+                    <h3>Cryogenic Systems</h3>
+                    <p>Thermal and stress analysis for LNG containment systems and cryogenic piping.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Power Management</h3>
+                    <p>Integrated electrical load analysis and power generation optimization tools.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Calculations Section -->
+    <section class="calculations" id="calculations">
+        <div class="container">
+            <div class="section-title">
+                <h2>Engineering Calculations</h2>
+                <p>Experience the precision of Murphy's Curves with our industry-leading calculation modules</p>
+            </div>
+            <div class="calc-tabs">
+                <div class="calc-tab active">Mooring Analysis</div>
+                <div class="calc-tab">LNG Boil-off</div>
+                <div class="calc-tab">Tank Sloshing</div>
+                <div class="calc-tab">Process Cooling</div>
+                <div class="calc-tab">Structural Stress</div>
+            </div>
+            <div class="calc-content">
+                <div class="calc-form">
+                    <div class="form-group">
+                        <label for="waterDepth">Water Depth (m)</label>
+                        <input type="number" id="waterDepth" value="1500">
+                    </div>
+                    <div class="form-group">
+                        <label for="vesselDisplacement">Vessel Displacement (tons)</label>
+                        <input type="number" id="vesselDisplacement" value="285000">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentSpeed">Current Speed (knots)</label>
+                        <input type="number" id="currentSpeed" value="3.2" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="waveHeight">Significant Wave Height (m)</label>
+                        <input type="number" id="waveHeight" value="5.8" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="mooringType">Mooring System Type</label>
+                        <select id="mooringType">
+                            <option>Turret Mooring</option>
+                            <option>Spread Mooring</option>
+                            <option>Dynamic Positioning</option>
+                            <option>Internal Turret</option>
+                            <option>External Turret</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="safetyFactor">Safety Factor</label>
+                        <input type="number" id="safetyFactor" value="1.75" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="lineDiameter">Line Diameter (mm)</label>
+                        <input type="number" id="lineDiameter" value="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="lineMaterial">Line Material</label>
+                        <select id="lineMaterial">
+                            <option>Chain</option>
+                            <option>Wire Rope</option>
+                            <option>Synthetic Fiber</option>
+                            <option>Hybrid</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 30px; width: 100%; padding: 18px; font-size: 1.1rem;">Calculate Mooring Loads</button>
+                <div class="calc-result">
+                    <h3>Mooring Analysis Results</h3>
+                    <div class="result-row">
+                        <div class="result-label">Maximum Line Tension:</div>
+                        <div class="result-value">2,145 kN</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Safety Margin:</div>
+                        <div class="result-value">1.85</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Vessel Offset:</div>
+                        <div class="result-value">7.2% of water depth</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Fatigue Life:</div>
+                        <div class="result-value">32.7 years</div>
+                    </div>
+                    <div class="result-row">
+                        <div class="result-label">Recommendation:</div>
+                        <div class="result-value">System exceeds design criteria</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Offloading Section -->
+    <section class="offloading" id="offloading">
+        <div class="container">
+            <div class="section-title">
+                <h2>FLNG Offloading Calculations</h2>
+                <p>Precision calculations for LNG transfer operations based on Murphy's Curves proprietary algorithms</p>
+            </div>
+            <div class="offloading-container">
+                <div class="offloading-input">
+                    <h2 style="color: var(--gold); font-family: 'Rajdhani'; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1.5px;">
+                        <i class="fas fa-sliders-h"></i> Input Parameters
+                    </h2>
+                    <div class="form-group">
+                        <label for="target">Target Production (mmtpa)</label>
+                        <input type="number" id="target" value="2.7" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="availability">Availability Factor</label>
+                        <input type="number" id="availability" value="0.92" step="0.01" min="0.8" max="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="tankSize">Total LNG Cargo Tank Size (m³)</label>
+                        <input type="number" id="tankSize" value="225000">
+                    </div>
+                    <div class="form-group">
+                        <label for="numTanks">Number of Tanks</label>
+                        <input type="number" id="numTanks" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="lngDensity">LNG Density (kg/m³)</label>
+                        <input type="number" id="lngDensity" value="443">
+                    </div>
+                    <div class="form-group">
+                        <label for="offloadingRate">Offloading Rate (m³/hr)</label>
+                        <input type="number" id="offloadingRate" value="12000">
+                    </div>
+                    <div class="form-group">
+                        <label for="pumpsPerTank">Number of Pumps per Tank</label>
+                        <input type="number" id="pumpsPerTank" value="2">
+                    </div>
+                    <button class="btn btn-primary" id="calculateBtn" style="width: 100%; padding: 16px; margin-top: 20px;">
+                        Calculate Offloading Parameters
+                    </button>
+                </div>
+                <div class="offloading-results">
+                    <h2 style="color: var(--gold); font-family: 'Rajdhani'; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1.5px;">
+                        <i class="fas fa-chart-bar"></i> Calculation Results
+                    </h2>
+                    <div class="result-card">
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Annual Operating Days</div>
+                            <div class="offloading-result-value" id="annualDays">335.8</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Annual LNG Production (Tonnes)</div>
+                            <div class="offloading-result-value" id="annualProduction">2,700,000</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">LNG Volume per Year (m³)</div>
+                            <div class="offloading-result-value" id="lngVolume">6,095,259</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Inventory Turns per Year</div>
+                            <div class="offloading-result-value" id="inventoryTurns">27.1</div>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Tank Pumping Rate (m³/hr)</div>
+                            <div class="offloading-result-value" id="tankPumpRate">2,400</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Pump Rate per Tank (m³/hr)</div>
+                            <div class="offloading-result-value" id="pumpRate">1,200</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Pump Rate per Tank (m³/day)</div>
+                            <div class="offloading-result-value" id="pumpRateDay">28,800</div>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Feed Gas Flowrate (Sm³/hr)</div>
+                            <div class="offloading-result-value" id="feedGasFlowrate">468878</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">Feed Gas Flowrate (mmscfd)</div>
+                            <div class="offloading-result-value" id="feedGasFlowratemmscfd">8,040,500</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">LNG Production Rate (m³/day)</div>
+                            <div class="offloading-result-value" id="lngProductionRate">18,150</div>
+                        </div>
+                        <div class="offloading-result-row">
+                            <div class="offloading-result-label">LNG Production Rate (kg/day)</div>
+                            <div class="offloading-result-value" id="lngProductionRateKg">8,040,500</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="offloadingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container">
+                <h2 style="color: var(--gold); font-family: 'Rajdhani'; margin: 50px 0 20px; text-transform: uppercase; letter-spacing: 1.5px;">
+                    <i class="fas fa-table"></i> Offloading Time Analysis
+                </h2>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Carrier Size (m³)</th>
+                            <th>Full Operation (hr)</th>
+                            <th>1 Pump Failure (hr)</th>
+                            <th>2 Pump Failure (hr)</th>
+                            <th>Stagnant LNG Volume (m³)</th>
+                            <th>Available Cargo Volume (m³)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>180,000</td>
+                            <td>15.0</td>
+                            <td>20.0</td>
+                            <td>30.0</td>
+                            <td>45,000</td>
+                            <td>180,000</td>
+                        </tr>
+                        <tr>
+                            <td>225,000</td>
+                            <td>18.8</td>
+                            <td>25.0</td>
+                            <td>37.5</td>
+                            <td>0</td>
+                            <td>225,000</td>
+                        </tr>
+                        <tr>
+                            <td>265,000</td>
+                            <td>22.1</td>
+                            <td>29.4</td>
+                            <td>44.2</td>
+                            <td>0</td>
+                            <td>225,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo" style="margin-bottom: 25px;">
+                        <div class="logo-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="logo-text">
+                            MURPHY'S CURVES
+                            <span>FLNG ENGINEERING SUITE</span>
+                        </div>
+                    </div>
+                    <p>Premium engineering solutions for the global FLNG industry. Precision calculations for demanding offshore environments.</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Calculations</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Hydrodynamics</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Structural Analysis</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Offloading Systems</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Process Systems</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Safety Systems</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Documentation</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>API Integration</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Training Programs</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Industry Reports</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Technical Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Enterprise</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Corporate Solutions</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Consulting Services</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Custom Development</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Security</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Compliance</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2023 Murphy's Curves FLNG Engineering Suite. All rights reserved. | Premium Engineering Solutions
+            </div>
+        </div>
+    </footer>
+    <!-- Auth Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>MURPHY'S CURVES ACCESS</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-tab="login">Login</div>
+                    <div class="tab" data-tab="register">Register</div>
+                </div>
+                <div class="tab-content active" id="loginTab">
+                    <div class="form-group">
+                        <label for="loginEmail">Corporate Email</label>
+                        <input type="email" id="loginEmail" placeholder="name@yourcompany.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">Access Engineering Suite</button>
+                    </div>
+                    <p style="text-align: center; margin-top: 25px; opacity: 0.8; font-size: 1.05rem;">
+                        <a href="#" style="color: var(--gold);">Forgot your credentials?</a>
+                    </p>
+                </div>
+                <div class="tab-content" id="registerTab">
+                    <div class="form-group">
+                        <label for="regCompany">Company Name</label>
+                        <input type="text" id="regCompany" placeholder="Your organization">
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Corporate Email</label>
+                        <input type="email" id="regEmail" placeholder="name@yourcompany.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Create Password</label>
+                        <input type="password" id="regPassword" placeholder="Minimum 12 characters">
+                    </div>
+                    <div class="form-group">
+                        <label for="regConfirm">Confirm Password</label>
+                        <input type="password" id="regConfirm" placeholder="Re-enter your password">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" style="margin-right: 10px;"> I agree to the <a href="#" style="color: var(--gold);">Terms of Service</a> and confirm I work in the FLNG industry
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">Request Professional Access</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Initialize offloading chart
+        const ctx = document.getElementById('offloadingChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Full Operation', '1 Pump Failure', '2 Pump Failure'],
+                datasets: [{
+                    label: 'Offloading Time (hr) for 180K m³',
+                    data: [15, 20, 30],
+                    backgroundColor: [
+                        'rgba(46, 139, 192, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(46, 139, 192, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Hours',
+                            color: '#b1d4e0'
+                        },
+                        ticks: {
+                            color: '#b1d4e0'
+                        },
+                        grid: {
+                            color: 'rgba(177, 212, 224, 0.1)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Operation Mode',
+                            color: '#b1d4e0'
+                        },
+                        ticks: {
+                            color: '#b1d4e0'
+                        },
+                        grid: {
+                            color: 'rgba(177, 212, 224, 0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#b1d4e0'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Offloading Time by Operation Mode',
+                        color: '#FFD700',
+                        font: {
+                            size: 16,
+                            family: "'Rajdhani', sans-serif"
+                        }
+                    }
+                }
+            }
+        });
+
+        // Offloading calculation via backend
+        document.getElementById('calculateBtn').addEventListener('click', async function () {
+            const formData = {
+                target: parseFloat(document.getElementById('target').value),
+                availability: parseFloat(document.getElementById('availability').value),
+                tankSize: parseFloat(document.getElementById('tankSize').value),
+                numTanks: parseFloat(document.getElementById('numTanks').value),
+                lngDensity: parseFloat(document.getElementById('lngDensity').value),
+                offloadingRate: parseFloat(document.getElementById('offloadingRate').value),
+                pumpsPerTank: parseFloat(document.getElementById('pumpsPerTank').value)
+            };
+
+            try {
+                const response = await fetch('/api/offload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) throw new Error('Calculation failed');
+
+                const result = await response.json();
+
+                // Update results
+                document.getElementById('annualDays').textContent = result.annualDays.toFixed(1);
+                document.getElementById('annualProduction').textContent = result.annualProduction.toLocaleString();
+                document.getElementById('lngVolume').textContent = Math.round(result.lngVolume).toLocaleString();
+                document.getElementById('inventoryTurns').textContent = result.inventoryTurns.toFixed(1);
+                document.getElementById('tankPumpRate').textContent = result.tankPumpRate.toLocaleString();
+                document.getElementById('pumpRate').textContent = result.pumpRate.toLocaleString();
+                document.getElementById('pumpRateDay').textContent = result.pumpRateDay.toLocaleString();
+                document.getElementById('feedGasFlowrate').textContent = Math.round(result.feedGasFlowrate).toLocaleString();
+                document.getElementById('feedGasFlowratemmscfd').textContent = Math.round(result.feedGasFlowratemmscfd).toLocaleString();
+                document.getElementById('lngProductionRate').textContent = Math.round(result.lngProductionRate).toLocaleString();
+                document.getElementById('lngProductionRateKg').textContent = Math.round(result.lngProductionRateKg).toLocaleString();
+
+                // Update chart
+                chart.data.datasets[0].data = [
+                    result.timeFullOp,
+                    result.timeOnePumpFail,
+                    result.timeTwoPumpFail
+                ];
+                chart.update();
+
+                // Update table
+                const rows = document.querySelectorAll('.results-table tbody tr');
+                const carrierSizes = [180000, 225000, 265000];
+                carrierSizes.forEach((size, i) => {
+                    rows[i].cells[1].textContent = result.offloadingTimes[i].full.toFixed(1);
+                    rows[i].cells[2].textContent = result.offloadingTimes[i].oneFail.toFixed(1);
+                    rows[i].cells[3].textContent = result.offloadingTimes[i].twoFail.toFixed(1);
+                    rows[i].cells[4].textContent = (formData.tankSize - size).toLocaleString();
+                    rows[i].cells[5].textContent = Math.min(formData.tankSize, size).toLocaleString();
+                });
+            } catch (error) {
+                alert("Error calculating results. Please try again.");
+                console.error(error);
+            }
+        });
+
+        // Trigger initial load
+        document.getElementById('calculateBtn').click();
+
+        // Modal and tab scripts (keep UI interactive)
+        const authModal = document.getElementById('authModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const heroRegisterBtn = document.getElementById('heroRegisterBtn');
+        const closeModal = document.querySelector('.close-modal');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        [loginBtn, registerBtn, heroRegisterBtn].forEach(btn => {
+            btn.addEventListener('click', () => {
+                authModal.classList.add('active');
+                if (btn === registerBtn || btn === heroRegisterBtn) {
+                    switchTab('register');
+                }
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            authModal.classList.remove('active');
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        function switchTab(tabName) {
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
+            });
+            tabContents.forEach(content => {
+                content.classList.toggle('active', content.id === `${tabName}Tab`);
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                authModal.classList.remove('active');
+            }
+        });
+
+        const calcTabs = document.querySelectorAll('.calc-tab');
+        calcTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                calcTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const calcTitle = tab.textContent;
+                document.querySelector('.calc-result h3').textContent = `${calcTitle} Results`;
+            });
+        });
+    </script>
+</body>
+</html>
